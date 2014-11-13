@@ -1,5 +1,7 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Jeff Shilling"
+date: "Monday, November 10, 2014"
 output: 
   html_document:
     keep_md: true
@@ -7,11 +9,26 @@ output:
 
 
 ## Loading and preprocessing the data
+The first step is to read the csv file.  Then calculate the total number of steps for each day.
+```{r read_data, echo=TRUE}
+activity = read.csv("activity.csv")
+daily = aggregate(activity$steps, by=list(activity$date), FUN=sum)
+```
 
+## What is mean total number of steps taken per day?  
+This histogram shows the distribution of total daily steps.  
+```{r total_daily_steps, echo=FALSE}
+meansteps = mean(daily$x, na.rm=T)
+medsteps = median(daily$x, na.rm=T)
 
-
-## What is mean total number of steps taken per day?
-
+hist(daily$x, breaks = 25, 
+     col = "lightblue", border = "black",
+     main = "Total number of steps taken each day",
+     xlab = "# Steps taken in a day", ylab = "Frequency")
+abline(v = meansteps, col = "blue", lwd = 2, lty = 2)
+```
+  
+The mean number of steps take each day is `r format(meansteps, nsmall=2, big.mark=",")`, shown as the blue dashed line in the histogram above.  The median number of steps is a quite similar `r format(medsteps, big.mark=",")`.  
 
 
 ## What is the average daily activity pattern?
