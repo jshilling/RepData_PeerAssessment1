@@ -29,14 +29,90 @@ abline(v = meansteps, col = "blue", lwd = 2, lty = 2)
 ```
   
 The mean number of steps take each day is `r format(meansteps, nsmall=2, big.mark=",")`, shown as the blue dashed line in the histogram above.  The median number of steps is a quite similar `r format(medsteps, big.mark=",")`.  
-
+  
+  
 
 ## What is the average daily activity pattern?
+The following chart shows the average activity for every 5 minute interval across the measured days.  
+```{r daily_act, echo=FALSE}
+interval_means = aggregate(activity$steps, by=list(activity$interval),
+                          FUN=mean, na.rm=T)
+names(interval_means) <- c("Interval", "Avg.Steps")
+with(interval_means, plot(Interval, Avg.Steps, type="l"))
 
+# find interval with largest Avg.Steps
+top <- with(interval_means, interval_means[Avg.Steps==max(Avg.Steps),])
+```
 
-
+The most were steps taken,  `r round(top$Avg.Steps, digits=2)` on average, in Interval #`r top$Interval`.  
+  
+    
 ## Imputing missing values
+There are `r summary(activity$steps)[7]` NAs or missing values in the steps column. Let's create a new dataframe, but replace missing or "NA" values with the mean value for that interval.  
 
+```{r impute_missing_values, echo=TRUE}
+# which rows have missing steps values
+index <- which(is.na(activity$steps))
+# create a new dataset and replace the NAs with mean
+# from the interval_means table, matching on the intervall
+act2=activity
+act2$steps[index] <- interval_means[match(act2[index,"interval"], interval_means$Interval), "Avg.Steps"]
 
+```
+
+This histogram shows the distribution of total daily steps with the imputed values.
+```{r imputed_histogram, echo=FALSE}
+# create and plot data of steps taken each day
+daily2 = aggregate(act2$steps, by=list(act2$date), FUN=sum)
+meansteps2 = mean(daily2$x, na.rm=T)
+medsteps2 = median(daily2$x, na.rm=T)
+# plot data
+hist(daily$x, breaks = 25,
+     col = "lightgreen", border = "black",
+     main = "Total number of steps taken each day\nwith imputed data",
+     xlab = "# Steps taken in a day", ylab = "Frequency")
+abline(v = meansteps, col = "darkgreen", lwd = 2, lty = 2)
+```
+
+The mean number of steps take each day is `r format(meansteps2, nsmall=2, big.mark=",")`, shown as the blue dashed line in the histogram above.  The median number of steps is a quite similar `r format(medsteps2, big.mark=",")`. (Note that if the median is not an integer, it must be one of the imputed values.)  
+
+Let's compare the mean and median values with and without imputed data:
+
+|  | Mean |Median|
+|:---|:----:|:---:|
+|Original| `r format(meansteps, nsmall=2, big.mark=",")` | `r format(medsteps, big.mark=",")`  |
+| Imputed| `r format(meansteps2, nsmall=2, big.mark=",")`| `r format(medsteps2, big.mark=",")` |
+
+Imputing values with the interval mean, in this case at least, does not seem to have a material effect on the outcome.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+To see if activity is different on weekends than on weekday, we need to sort the data into weekends and weekdays.  The following code does that using the imputed data set from the previous question.  
+```{r weekdays_vs_weekends, echo=TRUE}
+# add a column to the imputed data set to indicate
+# weekday or weekend, then use it to aggregate the data
+wend <- c("Saturday", "Sunday")
+act2$when <- ifelse(weekdays(as.Date(act2$date)) %in% wend, "Weekend", "Weekday")
+#
+# Calculate the average number of steps teken in each
+# interval for weekdays and weekends
+interval_avg_when <- aggregate(act2$steps,
+                            by=list(Interval = act2$interval,
+                                    When = act2$when),
+                            FUN=mean)
+interval_avg_when$When <- as.factor(interval_avg_when$When)
+names(interval_avg_when)[3] <- "Avg.Steps"
+```
+
+Graphing the results makes it easy to visually compare the activity patterns.  
+
+```{r weekdays_vs_weekends_graph, echo=FALSE}
+avgsteps = aggregate(Avg.Steps ~ When, interval_avg_when, mean)
+wday_steps <- avgsteps[avgsteps$When == "Weekday", "Avg.Steps"]
+wend_steps <- avgsteps[avgsteps$When == "Weekend", "Avg.Steps"]
+
+library(ggplot2)
+qplot(data=interval_avg_when, x=Interval, y=Avg.Steps, geom="line", facets=When ~ .)
+```
+  
+There appears to be a bit more activity the weekends.  The average number of steps on  weekends is `r round(wend_steps, digits=2)`.  The average number of steps on weekdays is `r round(wday_steps, digits=2)`.
