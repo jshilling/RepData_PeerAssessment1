@@ -1,6 +1,11 @@
-# Reproducible Research: Peer Assessment 1
-Jeff Shilling  
-Monday, November 10, 2014  
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "Jeff Shilling"
+date: "Monday, November 10, 2014"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 ## Loading and preprocessing the data
@@ -13,7 +18,7 @@ daily = aggregate(activity$steps, by=list(activity$date), FUN=sum)
 
 ## What is mean total number of steps taken per day?  
 This histogram shows the distribution of total daily steps.  
-![](PA1_template_files/figure-html/total_daily_steps-1.png) 
+![plot of chunk total_daily_steps](figure/total_daily_steps-1.png) 
   
 The mean number of steps take each day is 10,766.19, shown as the blue dashed line in the histogram above.  The median number of steps is a quite similar 10,765.  
   
@@ -21,7 +26,7 @@ The mean number of steps take each day is 10,766.19, shown as the blue dashed li
 
 ## What is the average daily activity pattern?
 The following chart shows the average activity for every 5 minute interval across the measured days.  
-![](PA1_template_files/figure-html/daily_act-1.png) 
+![plot of chunk daily_act](figure/daily_act-1.png) 
 
 The most were steps taken,  206.17 on average, in Interval #835.  
   
@@ -40,7 +45,7 @@ act2$steps[index] <- interval_means[match(act2[index,"interval"], interval_means
 ```
 
 This histogram shows the distribution of total daily steps with the imputed values.
-![](PA1_template_files/figure-html/imputed_histogram-1.png) 
+![plot of chunk imputed_histogram](figure/imputed_histogram-1.png) 
 
 The mean number of steps take each day is 10,766.19, shown as the blue dashed line in the histogram above.  The median number of steps is a quite similar 10,766.19. (Note that if the median is not an integer, it must be one of the imputed values.)  
 
@@ -75,6 +80,6 @@ names(interval_avg_when)[3] <- "Avg.Steps"
 
 Graphing the results makes it easy to visually compare the activity patterns.  
 
-![](PA1_template_files/figure-html/weekdays_vs_weekends_graph-1.png) 
+![plot of chunk weekdays_vs_weekends_graph](figure/weekdays_vs_weekends_graph-1.png) 
   
 There appears to be a bit more activity the weekends.  The average number of steps on  weekends is 42.37.  The average number of steps on weekdays is 35.61.
